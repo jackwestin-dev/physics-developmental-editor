@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next
+.next/
+out/
+
+# Env (keep example)
+.env
+.env.local
+.env*.local
+
+# Debug / IDE
+npm-debug.log*
+.DS_Store
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
