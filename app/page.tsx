@@ -102,7 +102,7 @@ export default function Home() {
           {error}
           {error.includes("API key") && (
             <div style={{ marginTop: "0.5rem", fontSize: "0.9rem" }}>
-              For local dev, add <code style={{ background: "var(--surface)", padding: "0.2em 0.4em", borderRadius: 4 }}>.env.local</code> with <code style={{ background: "var(--surface)", padding: "0.2em 0.4em", borderRadius: 4 }}>OPENAI_API_KEY=your-key</code>. On Vercel, set the same variable in Project → Settings → Environment Variables.
+              For local dev, add <code style={{ background: "var(--surface)", padding: "0.2em 0.4em", borderRadius: 4 }}>.env.local</code> with <code style={{ background: "var(--surface)", padding: "0.2em 0.4em", borderRadius: 4 }}>ANTHROPIC_API_KEY=your-key</code>. On Vercel, set the same variable in Project → Settings → Environment Variables.
             </div>
           )}
         </div>

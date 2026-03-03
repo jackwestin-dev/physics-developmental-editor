@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 import { loadPedagogy, loadStyleSamples, buildMessages } from "@/lib/pedagogy";
 
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
   try {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
         {
           error: "API key not configured",
-          hint: "Add OPENAI_API_KEY in Vercel Environment Variables (or .env.local for local dev).",
+          hint: "Add ANTHROPIC_API_KEY in Vercel Environment Variables (or .env.local for local dev).",
         },
         { status: 503 }
       );
@@ -33,25 +33,23 @@ export async function POST(request: Request) {
     const styleSamples = useStyleSamples ? loadStyleSamples() : "";
     const { system, user } = buildMessages(pedagogy, inputText, styleSamples, topic);
 
-    const client = new OpenAI({ apiKey });
-    const response = await client.chat.completions.create({
-      model: "gpt-4o",
+    const client = new Anthropic({ apiKey });
+    const response = await client.messages.create({
+      model: "claude-sonnet-4-20250514",
       max_tokens: 8192,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
+      system,
+      messages: [{ role: "user", content: user }],
     });
 
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
+    const block = response.content[0];
+    if (block.type !== "text") {
       return NextResponse.json(
         { error: "Unexpected response format from model." },
         { status: 502 }
       );
     }
 
-    return NextResponse.json({ excerpt: content });
+    return NextResponse.json({ excerpt: block.text });
   } catch (err) {
     console.error("Generate API error:", err);
     const message = err instanceof Error ? err.message : "Generation failed.";

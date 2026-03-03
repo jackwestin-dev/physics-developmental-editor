@@ -6,11 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate-pedagogy": "node scripts/generate-pedagogy.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
     "next": "^14.2.0",
-    "openai": "^4.104.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

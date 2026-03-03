@@ -57,13 +57,13 @@ Edit **pedagogy.md** to refine tone, section structure, and rules. The agent use
 
 ## Vercel app (web UI)
 
-The app runs **without an API key**: you can open it and use the form; when you click "Generate excerpt," you'll get a clear message to add `OPENAI_API_KEY` if it isn't set.
+The app runs **without an API key**: you can open it and use the form; when you click "Generate excerpt," you'll get a clear message to add `ANTHROPIC_API_KEY` if it isn't set.
 
 ### Local dev
 
 ```bash
 npm install
-cp .env.local.example .env.local   # optional: add OPENAI_API_KEY for generation
+cp .env.local.example .env.local   # optional: add ANTHROPIC_API_KEY for generation
 npm run dev
 ```
 
@@ -72,5 +72,5 @@ Open [http://localhost:3000](http://localhost:3000). Paste input content, option
 ### Deploy to Vercel
 
 1. Push the repo to GitHub and import the project in [Vercel](https://vercel.com).
-2. (Optional) In Project → Settings → Environment Variables, add `OPENAI_API_KEY` so generation works in production.
+2. (Optional) In Project → Settings → Environment Variables, add `ANTHROPIC_API_KEY` so generation works in production.
 3. Deploy. The app will build with `next build` and serve the same UI; generation works only if the env var is set.
