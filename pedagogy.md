@@ -32,10 +32,10 @@ The reference excerpts and the input content are **source material you must not 
 Each section places the reader in a specific, concrete situation **before** stating a law or definition.
 
 **Pattern (follow the structure, not the specific wording or scenarios from the samples):**
-1. Open with "Imagine you…," "You're…," or "When you…" so the reader is doing or observing something in an everyday setting.
+1. Open with "Imagine you…," "You're…," "When you…," or "To make the idea more concrete, [one simple setup]…" so the reader is doing or observing something in an everyday setting.
 2. Optionally pose a short question that creates curiosity about what just happened.
 3. Connect the scenario to the concept you are about to teach.
-4. State the formal definition or law.
+4. Either state the formal definition or law, or (when the law needs several terms) first define each term in order, then state the law, then add one consequence or special case in plain language.
 
 **Important:** You must invent a *brand-new* scenario for every concept. Do not reuse any scenario, setting, or object combination from the input or from the reference excerpts.
 
@@ -58,6 +58,8 @@ Questions are answered immediately or in the following paragraph; they are not l
 - **One or two sentences.** State the law or definition clearly and completely before unpacking or deriving.
 - **Rephrase in your own words.** Even for well-known laws, write the statement fresh rather than copying any particular textbook's phrasing. The physics must be accurate, but the English must be yours.
 - Follow the statement with a short link back to your opening scenario so the reader sees the connection.
+
+**Definition buildup before a law:** When a law or rule depends on several named terms (e.g. incident ray, normal, angle of incidence, angle of reflection), **define each term in order**, one or two sentences per term, so the reader has the vocabulary before you state the law. Use a single concrete scenario (e.g. "a laser pointer directed at a flat mirror") to anchor these definitions. Then state the law: e.g. "Furthermore, when you examine [the scenario], you can conclude that: [the rule]. This rule is known as the [law name]." After the law, add **one short consequence or special case** in plain language: "Note that, based on the law, if [simple case], then [result]. In other words, [interpretation]."
 
 ---
 
@@ -111,9 +113,9 @@ Extend **one** concrete scenario across multiple cases so the reader sees the sa
 
 ## 9. Figures and Captions
 
-- **Caption as full sentence(s).** Captions explain what the figure shows and reinforce the concept.
+- **Caption as full sentence(s).** Captions explain what the figure shows and reinforce the concept (e.g. "Figure 2. Incident rays striking a flat mirror surface with corresponding reflected rays, showing the normal line and angles θᵢ and θᵣ measured from the normal.").
+- **Reference figures in the body** when they support a definition or the law: "as shown in Figure 2," "as shown in Figure 3." Place the reference just before or after the sentence that benefits from the visual.
 - Write captions in your own words describing your own scenario — do not reuse caption text from the reference samples.
-- Reference figures in the body when helpful: "as shown in Figure 2," "[Figure 1]."
 
 ---
 

@@ -56,7 +56,7 @@ def build_messages(
     two_guidance = (
         "\n\n## Two-source synthesis\n\nYou are receiving **two** source inputs. "
         "Synthesize them into a single, coherent excerpt in our voice. Use both sources to inform coverage and depth; express everything in your own words. "
-        "When both sources cover a formula or definition that applies in multiple situations (e.g. work W = Fd cos θ), prefer one extended scenario explored across those situations: introduce the formula, then walk through each case (e.g. same direction, at an angle, opposite, perpendicular) with a concrete example and a **Conclusion:** per case, and end with a **Conclusions:** bullet list. Use the same concrete numbers where possible."
+        "When both sources cover a formula or definition that applies in multiple situations (e.g. work W = Fd cos θ), prefer one extended scenario explored across those situations: introduce the formula, then walk through each case (e.g. same direction, at an angle, opposite, perpendicular) with a **Conclusion:** per case, and end with a **Conclusions:** bullet list. When both sources cover a definition-and-law topic (e.g. reflection, law of reflection), prefer one concrete scenario, then define each term in order, then state the law, then one short consequence or special case; reference figures and use full-sentence captions. It is okay to focus on one clear thread rather than packing every subtopic from both inputs."
         if has_two
         else ""
     )
