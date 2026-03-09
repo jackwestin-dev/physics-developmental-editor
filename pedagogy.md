@@ -7,14 +7,15 @@ This document is derived from three reference excerpts (jw_energy_excerpt.md, jw
 
 ## 0. Originality Requirements (CRITICAL — read first)
 
-The reference excerpts and the input content are **source material you must not copy**. Your output must be substantially original:
+The reference excerpts and the input content are **source material you must not copy**. Keep the **tone and approach**; change the **examples, analogies, and framing**. Your output must be substantially original:
 
 - **Never reproduce sentences or phrases from the input or the reference excerpts.** Absorb the *physics* and the *structural patterns*, then express everything in your own words from scratch. If a sentence in your draft could be found — even approximately — in the input or reference samples, rewrite it until it cannot.
+- **Original examples only — but keep them real-world.** Do not reuse the input's examples, even with different numbers. If the input uses "body fat and bone density," "atmosphere vs ocean," "iron vs wood," "relative density critique of specific gravity," or any other specific illustration, you must replace it with a **different real-world example** that teaches the same idea. Same for unit-conversion explanations: same physics, but your own framing and your own numerical example.
+- **Original analogies and framing.** Do not reuse the input's analogies (e.g. "heavier" vs "denser") or the exact way it introduces a sequence (e.g. m = ρV then mg = ρVg). Teach the same relationships in your own order and with your own lead-in. If the input critiques a term (e.g. "relative density" vs "specific gravity"), make the same conceptual point in your own words and, if possible, with a different illustration.
 - **Invent entirely new opening scenarios.** If the input uses a bicycle in a park, you must choose a completely different setting, different objects, and different characters or situations. The scenario must still be concrete and everyday, but it must be yours.
-- **Create fresh numerical problems and examples.** Never reuse masses, distances, speeds, forces, or other quantities from the input. Choose new realistic values and work through the math with those values. If the input derives an equation step-by-step, you should still show the derivation, but frame it around your new scenario with your new numbers.
-- **Rephrase all definitions and law statements.** State the same physics in different words. You may keep standard equation forms (F = ma, KE = ½mv², etc.), but the surrounding prose that introduces, explains, and interprets those equations must be freshly written.
-- **Use different everyday objects and analogies.** If the reference samples use a skateboard-and-wall scenario, do not use a skateboard and wall. Pick a different pair of interacting objects. Vary the objects across your output so that it is clearly distinct from the samples.
-- **Self-check before finishing:** Re-read your output alongside the input. Any passage that closely echoes the input's wording must be rewritten. The goal is that no paragraph in your output shares more than a few common content words with any paragraph in the input.
+- **Create fresh numerical problems and examples.** Never reuse masses, distances, speeds, forces, densities, or other quantities from the input. Choose new realistic values and work through the math with those values. If the input derives an equation step-by-step, you should still show the derivation, but frame it around your new scenario with your new numbers.
+- **Rephrase all definitions and law statements.** State the same physics in different words. You may keep standard equation forms (F = ma, ρ = m/V, etc.), but the surrounding prose that introduces, explains, and interprets those equations must be freshly written.
+- **Self-check before finishing:** Re-read your output alongside the input. Any passage that closely echoes the input's wording, examples, or framing must be rewritten. The goal is that no paragraph in your output shares more than a few common content words with any paragraph in the input, and **no example or analogy is lifted from the input**.
 
 ---
 
