@@ -6,6 +6,14 @@ export const maxDuration = 60;
 
 type SourcePayload = { text?: string; imageBase64?: string; imageMediaType?: string };
 
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"] as const;
+type AllowedImageType = (typeof ALLOWED_IMAGE_TYPES)[number];
+
+function toAllowedMediaType(s: string | undefined): AllowedImageType {
+  if (s && ALLOWED_IMAGE_TYPES.includes(s as AllowedImageType)) return s as AllowedImageType;
+  return "image/png";
+}
+
 function parseSource(raw: unknown): SourcePayload {
   if (raw == null || typeof raw !== "object") return {};
   const o = raw as Record<string, unknown>;
@@ -35,8 +43,8 @@ export async function POST(request: Request) {
     const topic = typeof body.topic === "string" ? body.topic.trim() || null : null;
     const useStyleSamples = body.useStyleSamples !== false;
 
-    const hasSource1 = source1.text.length > 0 || source1.imageBase64;
-    const hasSource2 = source2.text.length > 0 || source2.imageBase64;
+    const hasSource1 = (source1.text?.length ?? 0) > 0 || !!source1.imageBase64;
+    const hasSource2 = (source2.text?.length ?? 0) > 0 || !!source2.imageBase64;
     if (!hasSource1 && !hasSource2) {
       return NextResponse.json(
         { error: "Provide at least one source (Source 1 or Source 2) with text or an image." },
@@ -48,23 +56,25 @@ export async function POST(request: Request) {
     const styleSamples = useStyleSamples ? loadStyleSamples() : "";
     const { system, user } = buildMessages(
       pedagogy,
-      { text: source1.text },
-      hasSource2 ? { text: source2.text } : null,
+      { text: source1.text ?? "" },
+      hasSource2 ? { text: source2.text ?? "" } : null,
       styleSamples,
       topic,
       { source1HasImage: !!source1.imageBase64, source2HasImage: !!source2.imageBase64 }
     );
 
-    type ContentBlock =
-      | { type: "text"; text: string }
-      | { type: "image"; source: { type: "base64"; media_type: string; data: string } };
+    type ImageBlock = {
+      type: "image";
+      source: { type: "base64"; media_type: AllowedImageType; data: string };
+    };
+    type ContentBlock = { type: "text"; text: string } | ImageBlock;
     const content: ContentBlock[] = [{ type: "text", text: user }];
     if (source1.imageBase64) {
       content.push({
         type: "image",
         source: {
           type: "base64",
-          media_type: source1.imageMediaType || "image/png",
+          media_type: toAllowedMediaType(source1.imageMediaType),
           data: source1.imageBase64,
         },
       });
@@ -74,7 +84,7 @@ export async function POST(request: Request) {
         type: "image",
         source: {
           type: "base64",
-          media_type: source2.imageMediaType || "image/png",
+          media_type: toAllowedMediaType(source2.imageMediaType),
           data: source2.imageBase64,
         },
       });
