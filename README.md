@@ -6,7 +6,7 @@ Transform raw or reference-style physics content into textbook excerpts that mat
 
 - **pedagogy.md** — Style guide and pedagogy rules (voice, structure, don’ts). Derived from the `jw_*.md` sample excerpts.
 - **agent.py** — CLI agent that reads input + pedagogy (and optional style samples), calls Claude, and writes an excerpt.
-- **Next.js app (Vercel)** — Web UI: paste input, optional topic, generate excerpt. Runs without an API key (you'll be prompted to add one when you hit Generate).
+- **Next.js app (Vercel)** — Web UI: two source boxes (text and/or screenshot each), optional topic, generate excerpt. Runs without an API key (you'll be prompted to add one when you hit Generate).
 
 ## Setup
 
@@ -31,8 +31,11 @@ python3 agent.py third_law_sample1.md
 # Single input with topic hint and custom output path
 python3 agent.py third_law_sample1.md --topic "Newton's third law" -o my_excerpt.md
 
-# Multiple inputs concatenated
-python3 agent.py sample1.md sample2.md -o combined_excerpt.md
+# Two sources (synthesis into one excerpt)
+python3 agent.py source1.md source2.md -o excerpt_output.md
+
+# Three or more inputs concatenated as Source 1
+python3 agent.py sample1.md sample2.md sample3.md -o combined_excerpt.md
 
 # Without using jw_*.md style samples (pedagogy only)
 python3 agent.py third_law_sample1.md --no-style-samples
@@ -46,7 +49,7 @@ By default the agent:
 
 ## Input vs output
 
-- **Input**: Reference-style or dense source material (e.g. `third_law_sample1.md`).
+- **Input**: One or two sources—text and/or screenshots. In the app, Source 1 and Source 2 can each have pasted text and/or an uploaded image. With two sources, the agent synthesizes both into one excerpt in your voice.
 - **Output**: Narrative excerpt in the style of the `jw_*` samples (concrete scenarios, second-person “you,” misconception handling, clear conclusions).
 
 ## Pedagogy file
@@ -67,7 +70,7 @@ cp .env.local.example .env.local   # optional: add ANTHROPIC_API_KEY for generat
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Paste input content, optionally set a topic and "Use style samples," then click **Generate excerpt**.
+Open [http://localhost:3000](http://localhost:3000). Add one or two sources (paste text and/or upload a screenshot in Source 1 and optionally Source 2), optionally set a topic and "Use style samples," then click **Generate excerpt**. With two sources, the editor synthesizes both into one excerpt in your pedagogy and voice.
 
 ### Deploy to Vercel
 

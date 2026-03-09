@@ -125,6 +125,33 @@ h1 {
   margin-bottom: 0.5rem;
 }
 
+.input-hint {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: -0.25rem 0 0.5rem;
+}
+
+.file-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+button.secondary {
+  background: var(--surface);
+  color: var(--text-medium);
+  box-shadow: none;
+  border: 1px solid var(--border);
+  font-weight: 500;
+}
+
+button.secondary:hover:not(:disabled) {
+  background: var(--border);
+  box-shadow: none;
+}
+
 textarea {
   width: 100%;
   min-height: 180px;

@@ -4,6 +4,18 @@ import { loadPedagogy, loadStyleSamples, buildMessages } from "@/lib/pedagogy";
 
 export const maxDuration = 60;
 
+type SourcePayload = { text?: string; imageBase64?: string; imageMediaType?: string };
+
+function parseSource(raw: unknown): SourcePayload {
+  if (raw == null || typeof raw !== "object") return {};
+  const o = raw as Record<string, unknown>;
+  return {
+    text: typeof o.text === "string" ? o.text.trim() : "",
+    imageBase64: typeof o.imageBase64 === "string" ? o.imageBase64 : undefined,
+    imageMediaType: typeof o.imageMediaType === "string" ? o.imageMediaType : undefined,
+  };
+}
+
 export async function POST(request: Request) {
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -18,27 +30,62 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const inputText = typeof body.inputText === "string" ? body.inputText.trim() : "";
+    const source1 = parseSource(body.source1);
+    const source2 = parseSource(body.source2);
     const topic = typeof body.topic === "string" ? body.topic.trim() || null : null;
     const useStyleSamples = body.useStyleSamples !== false;
 
-    if (!inputText) {
+    const hasSource1 = source1.text.length > 0 || source1.imageBase64;
+    const hasSource2 = source2.text.length > 0 || source2.imageBase64;
+    if (!hasSource1 && !hasSource2) {
       return NextResponse.json(
-        { error: "inputText is required and must be non-empty." },
+        { error: "Provide at least one source (Source 1 or Source 2) with text or an image." },
         { status: 400 }
       );
     }
 
     const pedagogy = loadPedagogy();
     const styleSamples = useStyleSamples ? loadStyleSamples() : "";
-    const { system, user } = buildMessages(pedagogy, inputText, styleSamples, topic);
+    const { system, user } = buildMessages(
+      pedagogy,
+      { text: source1.text },
+      hasSource2 ? { text: source2.text } : null,
+      styleSamples,
+      topic,
+      { source1HasImage: !!source1.imageBase64, source2HasImage: !!source2.imageBase64 }
+    );
+
+    type ContentBlock =
+      | { type: "text"; text: string }
+      | { type: "image"; source: { type: "base64"; media_type: string; data: string } };
+    const content: ContentBlock[] = [{ type: "text", text: user }];
+    if (source1.imageBase64) {
+      content.push({
+        type: "image",
+        source: {
+          type: "base64",
+          media_type: source1.imageMediaType || "image/png",
+          data: source1.imageBase64,
+        },
+      });
+    }
+    if (source2.imageBase64) {
+      content.push({
+        type: "image",
+        source: {
+          type: "base64",
+          media_type: source2.imageMediaType || "image/png",
+          data: source2.imageBase64,
+        },
+      });
+    }
 
     const client = new Anthropic({ apiKey });
     const response = await client.messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 8192,
       system,
-      messages: [{ role: "user", content: user }],
+      messages: [{ role: "user", content: content.length > 1 ? content : user }],
     });
 
     const block = response.content[0];

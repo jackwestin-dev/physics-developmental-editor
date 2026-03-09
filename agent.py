@@ -46,12 +46,23 @@ def load_style_samples(base_dir: Path) -> str:
 
 def build_messages(
     pedagogy: str,
-    input_text: str,
+    source1_text: str,
+    source2_text: Optional[str],
     style_samples: str,
     topic_hint: Optional[str],
 ) -> tuple[str, str]:
-    """Build system and user messages for the LLM."""
-    system = f"""You are a physics textbook developmental editor. Your job is to rewrite raw or reference-style physics content into a textbook excerpt that matches a specific pedagogy and narration style.
+    """Build system and user messages for the LLM. source2_text is optional (two-source synthesis)."""
+    has_two = bool(source2_text and source2_text.strip())
+    two_guidance = (
+        "\n\n## Two-source synthesis\n\nYou are receiving **two** source inputs. "
+        "Synthesize them into a single, coherent excerpt in our voice. Use both sources to inform coverage and depth; express everything in your own words."
+        if has_two
+        else ""
+    )
+    system = f"""You are a physics textbook developmental editor. Your job is to transform raw or reference-style physics content into a fully original textbook excerpt that follows a specific pedagogy and narration style.
+{two_guidance}
+
+CRITICAL ORIGINALITY RULE: Your output must be **completely original prose**. You must NOT copy, closely paraphrase, or echo sentences from the input content or from the reference excerpts. Absorb the physics and the structural patterns, then write everything from scratch in your own words. Invent new scenarios, new everyday objects, and new numerical values. If you catch yourself writing a sentence that resembles the input, stop and rewrite it.
 
 ## Pedagogy and style guide (follow this strictly)
 
@@ -61,21 +72,25 @@ def build_messages(
     if style_samples:
         system += f"""
 
-## Reference excerpts (match this tone and structure)
+## Reference excerpts (for STRUCTURAL and TONAL reference only — DO NOT copy language)
 
-Use these as concrete examples of the target style. Match second-person "you," concrete opening scenarios, misconception handling, and section structure.
+Study these excerpts to understand the target structure, voice, and pedagogical flow. Match the second-person style, the hook-before-definition pattern, misconception handling, and section organization. However, do NOT reproduce any sentences, phrases, scenarios, or examples from these excerpts. Your output must use entirely different wording, different objects, different settings, and different numerical values.
 
 {style_samples}
 """
 
-    user_parts = [
-        "## Input content to transform\n\nRewrite the following content into a single textbook excerpt that follows the pedagogy guide and matches the reference style.",
-        "---\n",
-        input_text,
-    ]
+    if has_two:
+        instruction = "Synthesize the following **two sources** into one textbook excerpt in our voice. Use both sources to inform your coverage; then write a fully **original** excerpt. Follow the pedagogy guide's structure and voice."
+    else:
+        instruction = "Transform the following physics content into a fully **original** textbook excerpt. Follow the pedagogy guide's structure and voice, but express all ideas in completely new language. Do not closely paraphrase or echo the input's wording — write as if you are a different author covering the same physics topic."
+
+    user_parts = ["## Content to transform\n\n" + instruction, "---\n"]
     if topic_hint:
-        user_parts.insert(1, f"\nTopic/section focus: {topic_hint}\n")
-    user = "\n".join(user_parts)
+        user_parts.append(f"\nTopic/section focus: {topic_hint}\n")
+    user_parts.extend(["### Source 1\n\n", source1_text.strip() or "(No text provided.)"])
+    if has_two:
+        user_parts.extend(["\n\n### Source 2\n\n", source2_text.strip()])
+    user = "".join(user_parts)
 
     return system, user
 
@@ -107,7 +122,7 @@ def main() -> None:
         "input",
         nargs="+",
         type=Path,
-        help="Input file(s) to transform (content will be concatenated)",
+        help="Input file(s). If exactly two files: treated as Source 1 and Source 2 (synthesis). Otherwise: concatenated as Source 1.",
     )
     parser.add_argument(
         "-o",
@@ -144,12 +159,17 @@ def main() -> None:
         if not path.exists():
             raise FileNotFoundError(f"Input file not found: {path}")
         input_parts.append(load_file(path))
-    input_text = "\n\n---\n\n".join(input_parts)
+
+    if len(input_parts) == 2:
+        source1_text, source2_text = input_parts[0], input_parts[1]
+    else:
+        source1_text = "\n\n---\n\n".join(input_parts)
+        source2_text = None
 
     style_samples = "" if args.no_style_samples else load_style_samples(base_dir)
 
     system, user = build_messages(
-        pedagogy, input_text, style_samples, args.topic
+        pedagogy, source1_text, source2_text, style_samples, args.topic
     )
 
     api_key = os.environ.get("ANTHROPIC_API_KEY")
