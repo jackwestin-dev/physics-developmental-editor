@@ -55,7 +55,8 @@ def build_messages(
     has_two = bool(source2_text and source2_text.strip())
     two_guidance = (
         "\n\n## Two-source synthesis\n\nYou are receiving **two** source inputs. "
-        "Synthesize them into a single, coherent excerpt in our voice. Use both sources to inform coverage and depth; express everything in your own words."
+        "Synthesize them into a single, coherent excerpt in our voice. Use both sources to inform coverage and depth; express everything in your own words. "
+        "When both sources cover a formula or definition that applies in multiple situations (e.g. work W = Fd cos θ), prefer one extended scenario explored across those situations: introduce the formula, then walk through each case (e.g. same direction, at an angle, opposite, perpendicular) with a concrete example and a **Conclusion:** per case, and end with a **Conclusions:** bullet list. Use the same concrete numbers where possible."
         if has_two
         else ""
     )

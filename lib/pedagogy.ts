@@ -42,7 +42,9 @@ export function buildMessages(
 
 ## Two-source synthesis
 
-You are receiving **two** source inputs (e.g. two textbook excerpts or two reference materials on the same topic). Your job is to **synthesize** them into a single, coherent excerpt in our voice—not to rewrite one and ignore the other. Use both sources to inform coverage, depth, and accuracy. Draw on the physics and pedagogical ideas from both, then express everything in your own words with your own scenarios and examples. The result should read as one unified narrative that could have been written by a single author, not as a patchwork of the two inputs.`
+You are receiving **two** source inputs (e.g. two textbook excerpts or two reference materials on the same topic). Your job is to **synthesize** them into a single, coherent excerpt in our voice—not to rewrite one and ignore the other. Use both sources to inform coverage, depth, and accuracy. Draw on the physics and pedagogical ideas from both, then express everything in your own words with your own scenarios and examples. The result should read as one unified narrative that could have been written by a single author, not as a patchwork of the two inputs.
+
+When both sources cover a **formula or definition that applies in multiple situations** (e.g. work W = Fd cos θ, or force and acceleration), prefer **one extended scenario** explored across those situations: introduce the formula, then walk through case 1 (e.g. force and displacement in same direction) with a concrete example and a **Conclusion:**, then case 2 (e.g. at an angle), then case 3 (e.g. opposite direction), then case 4 (e.g. perpendicular), each with a short **Conclusion:**, and end with a **Conclusions:** bullet list. Use the same concrete numbers where possible so the reader sees one thread.`
     : "";
 
   let system = `You are a physics textbook developmental editor. Your job is to transform raw or reference-style physics content into a fully original textbook excerpt that follows a specific pedagogy and narration style.

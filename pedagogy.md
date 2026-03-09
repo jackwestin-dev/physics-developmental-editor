@@ -66,9 +66,11 @@ Questions are answered immediately or in the following paragraph; they are not l
 - **Introduce in prose** with a short sentence, then place the equation on its own line.
 - **Explain notation** in the sentence(s) after the equation: subscripts, sign conventions, and variable meanings.
 - **Derivations:** For step-by-step algebra, narrate each step briefly, then show the equation. End with a one-sentence interpretation of what each side means physically.
-- **Caveats in prose:** After a theorem, state any conditions or limitations on its use.
+- **Caveats in prose:** After a theorem or formula, state any conditions or limitations on its use (e.g. "this formula applies ONLY when the force remains constant in magnitude and direction").
+- **Units:** When a concept has SI units, derive or state them clearly (e.g. force × distance → N·m = J). One brief numerical example can fix the unit in the reader's mind.
+- **Scalar quantities with sign:** If the quantity is a scalar but can be positive or negative (e.g. work), state explicitly that it is not a vector and explain what the sign means physically (e.g. positive = energy added to the object, negative = energy removed).
 
-Write all surrounding prose in your own words. Standard equation forms (F = ma, KE = ½mv², etc.) are fine to keep, but the explanatory sentences around them must be original.
+Write all surrounding prose in your own words. Standard equation forms (F = ma, W = Fd cos θ, etc.) are fine to keep, but the explanatory sentences around them must be original.
 
 ---
 
@@ -95,12 +97,15 @@ When a concept has criteria or steps, make them easy to scan and follow.
 
 ---
 
-## 8. Worked Conceptual Examples
+## 8. Worked Conceptual Examples: One Scenario, Multiple Cases
 
-Extend one scenario to test understanding and show how the concept applies.
+Extend **one** concrete scenario across multiple cases so the reader sees the same situation analyzed from different angles (literally or figuratively).
 
-- Develop a single scenario fully rather than scattering many different examples. Walk the reader through identifying relevant quantities, applying the concept, and interpreting the result.
-- **Use a new scenario** — different objects and setup from the input and from the reference samples. The structure (identify → apply → interpret → test) should match, but the content must be original.
+- **Pick one situation** (e.g. pushing a stalled car, lifting a box, pulling a cart) and keep the same objects and, where possible, the same numerical values (same force magnitude, same distance). Vary only what changes conceptually (e.g. angle between force and displacement: 0°, then a nonzero angle, then 90°, then 180°).
+- **Walk through each case in order.** For each case: state the setup, apply the formula or principle, work the numbers, interpret the result in plain language. The reader should see one thread from start to finish.
+- **End each conceptual case with an explicit "Conclusion:"** — one sentence (or two) stating the takeaway of that case. This makes the structure easy to scan and reinforces learning.
+- **End the section with "Conclusions:"** — a short bullet list that summarizes the main points across all cases (e.g. when work is positive, negative, or zero; how angle affects the result).
+- **Use a new scenario** — different from the input and reference samples. The structure (one scenario → case 1 → Conclusion → case 2 → Conclusion → … → Conclusions) should match; the content must be original.
 
 ---
 
@@ -114,8 +119,9 @@ Extend one scenario to test understanding and show how the concept applies.
 
 ## 10. Section Headings and Conclusions
 
-- **Clear section headings** that signal content. Write headings that reflect your new scenario and angle, not the headings from the reference samples.
-- **Explicit conclusion** for the section, summarizing the key takeaway in one to two sentences. Write this in your own words.
+- **Clear section headings** that signal content. When you develop one scenario across multiple cases, use headings that name each case (e.g. "When the Force and Displacement Act in the Same Direction," "When the Force Acts at an Angle," "When the Force Acts Perpendicular to the Displacement"). Write headings that reflect your new scenario and angle, not the headings from the reference samples.
+- **"Conclusion:" after each case.** When the excerpt is built around multiple cases (e.g. different angles or situations), end each case with a line that starts with **Conclusion:** followed by one or two sentences stating the takeaway for that case.
+- **"Conclusions:" at the end.** After all cases, add a **Conclusions:** line followed by a short bullet list that summarizes the main points (e.g. when the quantity is positive, negative, or zero; how key variables affect the result).
 - **Optional closing sentence** that looks forward to how the concept will be used later.
 
 ---
@@ -142,5 +148,6 @@ Extend one scenario to test understanding and show how the concept applies.
 
 - Put equations on their own lines; explain variables and conventions in the next sentence(s).
 - Use a **Caption:** prefix (or "Figure N. …") for figure captions, as full explanatory sentences.
-- Use **Conclusion:** for the final takeaway of a section when you want it to stand out.
+- Use **Conclusion:** for the takeaway of a single case or subsection (one to two sentences). When you have multiple cases, use **Conclusion:** after each case.
+- Use **Conclusions:** (plural) for the final summary of the whole section or topic, followed by a short bullet list of main points.
 - Use lists or short numbered steps for conditions and procedures so structure is easy to see.
