@@ -38,29 +38,47 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const source1 = parseSource(body.source1);
-    const source2 = parseSource(body.source2);
+    const rawSources = Array.isArray(body.sources) ? body.sources : [
+      body.source1,
+      body.source2,
+    ].filter(Boolean);
+    const sources = rawSources.slice(0, 5).map((raw: unknown) => parseSource(raw));
     const topic = typeof body.topic === "string" ? body.topic.trim() || null : null;
     const useStyleSamples = body.useStyleSamples !== false;
 
-    const hasSource1 = (source1.text?.length ?? 0) > 0 || !!source1.imageBase64;
-    const hasSource2 = (source2.text?.length ?? 0) > 0 || !!source2.imageBase64;
-    if (!hasSource1 && !hasSource2) {
+    if (sources.length === 0) {
       return NextResponse.json(
-        { error: "Provide at least one source (Source 1 or Source 2) with text or an image." },
+        { error: "Provide at least one source with text or an image." },
+        { status: 400 }
+      );
+    }
+    if (sources.length > 5) {
+      return NextResponse.json(
+        { error: "At most 5 sources allowed." },
+        { status: 400 }
+      );
+    }
+
+    const hasAtLeastOne = sources.some(
+      (s) => (s.text?.length ?? 0) > 0 || !!s.imageBase64
+    );
+    if (!hasAtLeastOne) {
+      return NextResponse.json(
+        { error: "At least one source must have text or an image." },
         { status: 400 }
       );
     }
 
     const pedagogy = loadPedagogy();
     const styleSamples = useStyleSamples ? loadStyleSamples() : "";
+    const sourceInputs = sources.map((s) => ({ text: s.text ?? "" }));
+    const sourceHasImage = sources.map((s) => !!s.imageBase64);
     const { system, user } = buildMessages(
       pedagogy,
-      { text: source1.text ?? "" },
-      hasSource2 ? { text: source2.text ?? "" } : null,
+      sourceInputs,
       styleSamples,
       topic,
-      { source1HasImage: !!source1.imageBase64, source2HasImage: !!source2.imageBase64 }
+      { sourceHasImage }
     );
 
     type ImageBlock = {
@@ -69,25 +87,17 @@ export async function POST(request: Request) {
     };
     type ContentBlock = { type: "text"; text: string } | ImageBlock;
     const content: ContentBlock[] = [{ type: "text", text: user }];
-    if (source1.imageBase64) {
-      content.push({
-        type: "image",
-        source: {
-          type: "base64",
-          media_type: toAllowedMediaType(source1.imageMediaType),
-          data: source1.imageBase64,
-        },
-      });
-    }
-    if (source2.imageBase64) {
-      content.push({
-        type: "image",
-        source: {
-          type: "base64",
-          media_type: toAllowedMediaType(source2.imageMediaType),
-          data: source2.imageBase64,
-        },
-      });
+    for (const s of sources) {
+      if (s.imageBase64) {
+        content.push({
+          type: "image",
+          source: {
+            type: "base64",
+            media_type: toAllowedMediaType(s.imageMediaType),
+            data: s.imageBase64,
+          },
+        });
+      }
     }
 
     const client = new Anthropic({ apiKey });
