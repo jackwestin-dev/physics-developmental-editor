@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       body.source1,
       body.source2,
     ].filter(Boolean);
-    const sources = rawSources.slice(0, 5).map((raw: unknown) => parseSource(raw));
+    const sources: SourcePayload[] = rawSources.slice(0, 5).map((raw: unknown) => parseSource(raw));
     const topic = typeof body.topic === "string" ? body.topic.trim() || null : null;
     const useStyleSamples = body.useStyleSamples !== false;
 
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     }
 
     const hasAtLeastOne = sources.some(
-      (s) => (s.text?.length ?? 0) > 0 || !!s.imageBase64
+      (s: SourcePayload) => (s.text?.length ?? 0) > 0 || !!s.imageBase64
     );
     if (!hasAtLeastOne) {
       return NextResponse.json(
@@ -71,8 +71,8 @@ export async function POST(request: Request) {
 
     const pedagogy = loadPedagogy();
     const styleSamples = useStyleSamples ? loadStyleSamples() : "";
-    const sourceInputs = sources.map((s) => ({ text: s.text ?? "" }));
-    const sourceHasImage = sources.map((s) => !!s.imageBase64);
+    const sourceInputs = sources.map((s: SourcePayload) => ({ text: s.text ?? "" }));
+    const sourceHasImage = sources.map((s: SourcePayload) => !!s.imageBase64);
     const { system, user } = buildMessages(
       pedagogy,
       sourceInputs,
