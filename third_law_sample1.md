@@ -1,0 +1,8 @@
+Interaction Pairs 
+Figure 14 illustrates the idea of forces as interaction pairs. There is a force from the woman on the dog's toy, and there is a force from the dog's toy on the woman. Forces always come in pairs similar to this example. Consider the woman (A) as one system and the toy (B) as another. What forces act on each of the two systems? Looking at the force diagrams in Figure 14, you can see that each system exerts a force on the other. The two forces, FA on 8 and F8 on A, are an example of an interaction pair, which is a set of two forces that are in opposite directions, have equal magni­tudes, and act on different objects. Sometimes, an interaction pair is called an action-reaction pair. This might suggest that one causes the other; however, this is not true. For example, the force of the woman pulling on the toy doesn't cause the toy to pull on the woman. The two forces either exist together or not at all. 
+Definition of Newton's third law In Figure 14, the force exerted by the woman on the toy is equal in magnitude and opposite in direction to the force exerted by the toy on the woman. Such an interaction pair is an example of Newton's third law, which states that all forces come in pairs. The two forces in a pair act on different objects and are equal in strength and opposite in direction.
+
+Figure 14 The force that the toy exerts on the woman and the force that the woman exerts on the toy are an interaction pair. 
+
+Newton's Third Law 
+The force of A on B is equal in magnitude and opposite in direction of the force of Bon A. 

@@ -5,6 +5,11 @@ Physics textbook developmental editor agent.
 Reads input resource(s) and pedagogy.md, then uses Claude to generate
 a textbook excerpt that matches the tone and narration style defined
 in the pedagogy guide.
+
+Output filter: The process can optionally pass the generated excerpt through
+the pedagogy review agent (review_document_agent, using physics_pedagogy.md),
+which rewrites it into a structured, student-friendly review document. Enable
+with --filter-with-review (not used in production by default).
 """
 
 from __future__ import annotations
@@ -12,12 +17,17 @@ from __future__ import annotations
 import argparse
 import os
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 try:
     import anthropic
 except ImportError:
     anthropic = None
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None  # type: ignore[misc, assignment]
 
 
 def load_file(path: Path) -> str:
@@ -46,22 +56,23 @@ def load_style_samples(base_dir: Path) -> str:
 
 def build_messages(
     pedagogy: str,
-    source1_text: str,
-    source2_text: Optional[str],
+    source_texts: List[str],
     style_samples: str,
     topic_hint: Optional[str],
 ) -> tuple[str, str]:
-    """Build system and user messages for the LLM. source2_text is optional (two-source synthesis)."""
-    has_two = bool(source2_text and source2_text.strip())
-    two_guidance = (
-        "\n\n## Two-source synthesis\n\nYou are receiving **two** source inputs. "
-        "Synthesize them into a single, coherent excerpt in our voice. Use both sources to inform coverage and depth; express everything in your own words. "
-        "When both sources cover a formula or definition that applies in multiple situations (e.g. work W = Fd cos θ), prefer one extended scenario explored across those situations: introduce the formula, then walk through each case (e.g. same direction, at an angle, opposite, perpendicular) with a **Conclusion:** per case, and end with a **Conclusions:** bullet list. When both sources cover a definition-and-law topic (e.g. reflection, law of reflection), prefer one concrete scenario, then define each term in order, then state the law, then one short consequence or special case; reference figures and use full-sentence captions. It is okay to focus on one clear thread rather than packing every subtopic from both inputs."
-        if has_two
-        else ""
-    )
+    """Build system and user messages for the LLM. source_texts must have 1–5 items."""
+    n = len(source_texts)
+    has_multiple = n >= 2
+    multi_guidance = ""
+    if has_multiple:
+        multi_guidance = (
+            "\n\n## Multi-source synthesis\n\n"
+            f"You are receiving **{n}** source inputs (Source 1 through Source {n}). "
+            "Synthesize them into a single, coherent excerpt in our voice. Use all sources to inform coverage and depth; express everything in your own words. "
+            "When multiple sources cover a formula or definition that applies in multiple situations (e.g. work W = Fd cos θ), prefer one extended scenario explored across those situations: introduce the formula, then walk through each case (e.g. same direction, at an angle, opposite, perpendicular) with a **Conclusion:** per case, and end with a **Conclusions:** bullet list. When sources cover a definition-and-law topic (e.g. reflection, law of reflection), prefer one concrete scenario, then define each term in order, then state the law, then one short consequence or special case; reference figures and use full-sentence captions. It is okay to focus on one clear thread rather than packing every subtopic from every input."
+        )
     system = f"""You are a physics textbook developmental editor. Your job is to transform raw or reference-style physics content into a fully original textbook excerpt that follows a specific pedagogy and narration style.
-{two_guidance}
+{multi_guidance}
 
 CRITICAL ORIGINALITY RULE: Keep the **tone and approach**; change the **examples, analogies, and framing**. Your output must be **completely original** in wording, examples, and how you introduce formulas. Do NOT copy or closely paraphrase sentences, examples, or analogies from the input or reference excerpts (e.g. do not reuse "relative density" critiques, body fat/bone or atmosphere/ocean comparisons, or the same formula sequence and lead-in as in the input). Use **real-world examples** that are your own—different objects, different numbers, different framing. If you catch yourself reusing an example or a turn of phrase from the input, replace it with an original, real-world alternative.
 
@@ -80,17 +91,22 @@ Study these excerpts to understand the target structure, voice, and pedagogical 
 {style_samples}
 """
 
-    if has_two:
-        instruction = "Synthesize the following **two sources** into one textbook excerpt in our voice. Use both sources to inform your coverage; then write a fully **original** excerpt. Keep the **tone and approach**; use **original examples, analogies, and framing**—real-world but not copied from either source (different objects, numbers, and formula lead-ins). Do not reuse either source's examples (e.g. no body fat/bone, atmosphere/ocean, or relative-density style critiques from the input). Write as if you are a different author teaching the same topic."
+    if has_multiple:
+        instruction = (
+            f"Synthesize the following **{n} sources** into one textbook excerpt in our voice. "
+            "Use all sources to inform your coverage; then write a fully **original** excerpt. "
+            "Keep the **tone and approach**; use **original examples, analogies, and framing**—real-world but not copied from any source (different objects, numbers, and formula lead-ins). "
+            "Do not reuse any source's examples or near-verbatim phrasing. Write as if you are a different author teaching the same topic."
+        )
     else:
         instruction = "Transform the following physics content into a fully **original** textbook excerpt. Keep the **tone and approach**; use **original examples, analogies, and framing**—real-world but not from the input (different objects, numbers, and how you introduce formulas). Do not reuse the input's examples or near-verbatim phrasing. Write as if you are a different author covering the same physics topic."
 
-    user_parts = ["## Content to transform\n\n" + instruction, "---\n"]
+    user_parts = ["## Content to transform\n\n" + instruction, "\n---\n"]
     if topic_hint:
         user_parts.append(f"\nTopic/section focus: {topic_hint}\n")
-    user_parts.extend(["### Source 1\n\n", source1_text.strip() or "(No text provided.)"])
-    if has_two:
-        user_parts.extend(["\n\n### Source 2\n\n", source2_text.strip()])
+    for i, text in enumerate(source_texts, start=1):
+        user_parts.append(f"\n### Source {i}\n\n")
+        user_parts.append((text or "(No text provided.)").strip())
     user = "".join(user_parts)
 
     return system, user
@@ -123,7 +139,7 @@ def main() -> None:
         "input",
         nargs="+",
         type=Path,
-        help="Input file(s). If exactly two files: treated as Source 1 and Source 2 (synthesis). Otherwise: concatenated as Source 1.",
+        help="Input file(s): 1 to 5 resources. Each file is Source 1, Source 2, …; multiple sources are synthesized into one excerpt.",
     )
     parser.add_argument(
         "-o",
@@ -149,28 +165,33 @@ def main() -> None:
         default=Path.cwd(),
         help="Project directory (default: current directory)",
     )
+    parser.add_argument(
+        "--filter-with-review",
+        action="store_true",
+        help="Pass generated excerpt through the pedagogy review agent before writing (output becomes structured review document). Not enabled in production.",
+    )
     args = parser.parse_args()
 
     base_dir = args.dir.resolve()
+    if load_dotenv is not None:
+        load_dotenv(base_dir / ".env")
+        load_dotenv(base_dir / ".env.local", override=True)
     pedagogy = load_pedagogy(base_dir)
 
-    input_parts = []
+    if len(args.input) > 5:
+        parser.error("At most 5 input resources allowed (got %d)." % len(args.input))
+
+    source_texts: List[str] = []
     for p in args.input:
         path = p if p.is_absolute() else base_dir / p
         if not path.exists():
             raise FileNotFoundError(f"Input file not found: {path}")
-        input_parts.append(load_file(path))
-
-    if len(input_parts) == 2:
-        source1_text, source2_text = input_parts[0], input_parts[1]
-    else:
-        source1_text = "\n\n---\n\n".join(input_parts)
-        source2_text = None
+        source_texts.append(load_file(path))
 
     style_samples = "" if args.no_style_samples else load_style_samples(base_dir)
 
     system, user = build_messages(
-        pedagogy, source1_text, source2_text, style_samples, args.topic
+        pedagogy, source_texts, style_samples, args.topic
     )
 
     api_key = os.environ.get("ANTHROPIC_API_KEY")
@@ -184,6 +205,16 @@ def main() -> None:
         return
 
     excerpt = run_claude(system, user, api_key)
+
+    # Output filter: optionally pass excerpt through the pedagogy review agent
+    # (structured, student-friendly review per physics_pedagogy.md). Off by default.
+    if args.filter_with_review:
+        from review_document_agent import run_review as run_pedagogy_review
+        excerpt = run_pedagogy_review(
+            excerpt,
+            api_key=api_key,
+            base_dir=base_dir,
+        )
 
     out_path = args.output
     if out_path is None:
