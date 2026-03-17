@@ -77,3 +77,36 @@ Open [http://localhost:3000](http://localhost:3000). Add one or two sources (pas
 1. Push the repo to GitHub and import the project in [Vercel](https://vercel.com).
 2. (Optional) In Project → Settings → Environment Variables, add `ANTHROPIC_API_KEY` so generation works in production.
 3. Deploy. The app will build with `next build` and serve the same UI; generation works only if the env var is set.
+
+---
+
+## Gap Analysis & Enhanced Pedagogy Agent
+
+A separate flow at **/gap** extends the pipeline with curriculum gap analysis and enhanced output.
+
+### What it does
+
+1. **Gap analysis** — You paste raw text from the Jack Westin book (foundational curriculum) and one or more external resource texts (e.g. AAMC materials, Khan Academy outlines). The agent compares them and returns a list of **things missing from the Jack Westin book**: every topic, concept, or sub-topic present in the resources but absent or under-covered in the book.
+2. **Enhanced output** — Using the same Six-Step Framework as the main editor, the agent produces a full pedagogically restructured document with those missing topics **integrated in place** (not appended). The result reads as one seamless document.
+
+### How to run
+
+- **Install**: `npm install`
+- **Run**: `npm run dev`
+- **Env**: Copy `.env.local.example` to `.env.local` and set `ANTHROPIC_API_KEY` (same key as the main editor).
+
+### Where to paste inputs
+
+- **Left panel** — Jack Westin book content (plain text; omit images).
+- **Right panel** — External resource content (AAMC lists, Khan Academy outlines, official MCAT content lists, etc.).
+
+Click **Analyze & Generate**. You’ll see:
+
+1. **"Things Missing from Jack Westin Book"** — A clearly titled block listing every missing topic. You can **Copy** this block and use it as a standalone curriculum gap report.
+2. **Enhanced Final Text** — The full restructured output with missing topics woven in. Use **Copy Full Output** to copy the entire document.
+
+### Notes
+
+- Images in the Jack Westin book should be omitted from the paste; text only.
+- If no gaps are found, the block shows: *"No significant gaps detected — the Jack Westin content appears to cover all topics in the provided resources."* The enhanced output is still generated from the Jack Westin content.
+- Each text area is limited to 200,000 characters (counter shown below the field).

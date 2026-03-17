@@ -18,7 +18,9 @@ export default function RootLayout({
           <div className="header-inner">
             <div className="logo">JW</div>
             <nav className="nav">
-              <a href="/">Editor</a>
+              <a href="/">Flow</a>
+              <a href="/editor">Editor</a>
+              <a href="/gap">Gap (legacy)</a>
             </nav>
           </div>
         </header>

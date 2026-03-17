@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 * {
   box-sizing: border-box;
 }
@@ -318,4 +320,159 @@ button:disabled {
 .main-wrap {
   position: relative;
   z-index: 1;
+}
+
+/* Unified flow page */
+.flow-page {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+}
+
+.flow-hero {
+  margin-bottom: 2rem;
+}
+
+.flow-hero .course-title {
+  margin-bottom: 0.25rem;
+}
+
+.flow-hero h1 {
+  font-size: 1.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.flow-hero .subtitle {
+  margin-bottom: 0;
+}
+
+.flow-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.flow-card-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 0.35rem;
+  letter-spacing: -0.02em;
+}
+
+.flow-card .input-hint {
+  margin-bottom: 1rem;
+}
+
+.flow-subsection {
+  margin-bottom: 1.25rem;
+}
+
+.flow-subsection:last-of-type {
+  margin-bottom: 0;
+}
+
+.flow-label-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.35rem;
+}
+
+.flow-label-row label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.flow-textarea {
+  min-height: 320px;
+  margin-top: 0;
+}
+
+.flow-textarea-jw {
+  min-height: 320px;
+}
+
+.flow-page .validation-error {
+  font-size: 0.9rem;
+  color: var(--error);
+  margin-top: 0.5rem;
+}
+
+.flow-cta-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+}
+
+.flow-cta-card .cta-button {
+  width: 100%;
+  max-width: 400px;
+  justify-content: center;
+  padding: 0.9rem 1.5rem;
+  font-size: 1.05rem;
+}
+
+.flow-reset-btn {
+  margin-top: 0.75rem;
+}
+
+.flow-output-card {
+  margin-top: 1.5rem;
+}
+
+.flow-error-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.message.error .dismiss-error {
+  margin-left: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  text-decoration: underline;
+  flex-shrink: 0;
+}
+
+.message.error .dismiss-error:hover {
+  background: rgba(255, 255, 255, 0.15);
+  text-decoration: none;
+}
+
+/* Loading state (flow page) - fallback when Tailwind not applied */
+.flow-output-card .loading-state-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  color: var(--text);
+}
+
+.flow-output-card .loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: flow-spin 0.8s linear infinite;
+}
+
+@keyframes flow-spin {
+  to { transform: rotate(360deg); }
 }
