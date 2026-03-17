@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { MissingTopicsBlock } from "@/components/MissingTopicsBlock";
+import { GapSummaryBlock } from "@/components/GapSummaryBlock";
 import { FinalTextBlock } from "@/components/FinalTextBlock";
 import { LoadingState } from "@/components/LoadingState";
 
@@ -48,15 +48,15 @@ async function extractTextFromPdf(file: File): Promise<string> {
   return parts.join("\n\n");
 }
 
-type FlowStatus = "idle" | "analyzing" | "generating" | "done" | "error";
+type FlowStatus = "idle" | "processing" | "done" | "error";
 
 export default function Home() {
   const [sources, setSources] = useState<SourceState[]>([{ ...emptySource }, { ...emptySource }]);
   const [jackWestin, setJackWestin] = useState<SourceState>({ ...emptySource });
   const [status, setStatus] = useState<FlowStatus>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [missingTopics, setMissingTopics] = useState<string[] | null>(null);
-  const [finalText, setFinalText] = useState<string | null>(null);
+  const [gapSummary, setGapSummary] = useState<string | null>(null);
+  const [fullDocument, setFullDocument] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<{ resources?: string; jackWestin?: string }>({});
   const [pdfExtracting, setPdfExtracting] = useState(false);
 
@@ -65,7 +65,7 @@ export default function Home() {
 
   const hasResourceText = sources.some((s) => s.text.trim().length > 0);
   const hasJackWestinText = jackWestin.text.trim().length > 0;
-  const canRun = hasResourceText && hasJackWestinText && status !== "analyzing" && status !== "generating";
+  const canRun = hasResourceText && hasJackWestinText && status !== "processing";
 
   const setSource = useCallback((index: number, update: Partial<SourceState> | ((prev: SourceState) => SourceState)) => {
     setSources((prev) => {
@@ -156,53 +156,26 @@ export default function Home() {
     }
     setValidationErrors({});
     setError(null);
-    setMissingTopics(null);
-    setFinalText(null);
-    setStatus("analyzing");
+    setGapSummary(null);
+    setFullDocument(null);
+    setStatus("processing");
 
     try {
-      const analyzeRes = await fetch("/api/analyze", {
+      const res = await fetch("/api/gap-fill", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ jackWestinText, resourceText }),
       });
-      const analyzeData = await analyzeRes.json();
+      const data = await res.json();
 
-      if (!analyzeRes.ok) {
+      if (!res.ok) {
         setStatus("error");
-        setError(analyzeData.error ?? analyzeData.detail ?? "Gap analysis failed.");
+        setError(data.error ?? data.detail ?? "Gap-fill failed.");
         return;
       }
 
-      const topics: string[] = Array.isArray(analyzeData.missingTopics) ? analyzeData.missingTopics : [];
-      setMissingTopics(topics);
-      setStatus("generating");
-
-      const genRes = await fetch("/api/enhanced-generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jackWestinText, resourceText, missingTopics: topics }),
-      });
-
-      if (!genRes.ok) {
-        const errData = await genRes.json().catch(() => ({}));
-        setStatus("error");
-        setError(errData.error ?? "Enhanced generation failed.");
-        return;
-      }
-
-      const reader = genRes.body?.getReader();
-      const decoder = new TextDecoder();
-      let fullText = "";
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          fullText += decoder.decode(value, { stream: true });
-          setFinalText(fullText);
-        }
-      }
-      setFinalText(fullText);
+      setGapSummary(typeof data.gapSummary === "string" ? data.gapSummary : "");
+      setFullDocument(typeof data.fullDocument === "string" ? data.fullDocument : "");
       setStatus("done");
     } catch (err) {
       setStatus("error");
@@ -211,8 +184,8 @@ export default function Home() {
   }
 
   function resetOutputs() {
-    setMissingTopics(null);
-    setFinalText(null);
+    setGapSummary(null);
+    setFullDocument(null);
     setStatus("idle");
     setError(null);
   }
@@ -223,7 +196,7 @@ export default function Home() {
         <p className="course-title">Physics Textbook Developmental Editor</p>
         <h1>Unified flow</h1>
         <p className="subtitle">
-          Add <strong>external resources</strong> (1–5: text, images, or PDFs), then the <strong>Jack Westin book</strong>. Run once to get gap analysis and the full pedagogically restructured output.
+          Add <strong>external resources</strong> (1–5: text, images, or PDFs), then the <strong>Jack Westin book</strong>. Run once to get a gap summary and a single, gap-filled document.
         </p>
       </header>
 
@@ -235,7 +208,7 @@ export default function Home() {
             <div className="flow-label-row">
               <label htmlFor={`resource-${index}`}>Resource {index + 1}</label>
               {sources.length > 1 && (
-                <button type="button" className="secondary" onClick={() => removeSource(index)} disabled={status === "analyzing" || status === "generating"} aria-label={`Remove resource ${index + 1}`}>
+                <button type="button" className="secondary" onClick={() => removeSource(index)} disabled={status === "processing"} aria-label={`Remove resource ${index + 1}`}>
                   Remove
                 </button>
               )}
@@ -245,7 +218,7 @@ export default function Home() {
               placeholder={`Paste or type text, or upload a PDF to extract text…`}
               value={source.text}
               onChange={(e) => setSource(index, { text: e.target.value })}
-              disabled={status === "analyzing" || status === "generating"}
+              disabled={status === "processing"}
               className="flow-textarea"
             />
             <div className="file-row">
@@ -257,17 +230,17 @@ export default function Home() {
                 onChange={(e) => onResourceFile(index, e)}
                 style={{ display: "none" }}
               />
-              <button type="button" className="secondary" onClick={() => fileRefs.current[index]?.click()} disabled={status === "analyzing" || status === "generating" || pdfExtracting}>
+              <button type="button" className="secondary" onClick={() => fileRefs.current[index]?.click()} disabled={status === "processing" || pdfExtracting}>
                 {pdfExtracting ? "Extracting PDF…" : source.pdfName ? `PDF: ${source.pdfName}` : source.imageName ? `Image: ${source.imageName}` : "Upload image or PDF"}
               </button>
-              {source.imageBase64 && <button type="button" className="secondary" onClick={() => setSource(index, { imageBase64: null, imageName: null, imageMediaType: null })} disabled={status === "analyzing" || status === "generating"}>Remove image</button>}
-              {source.pdfName && <button type="button" className="secondary" onClick={() => setSource(index, { text: "", pdfName: null })} disabled={status === "analyzing" || status === "generating"}>Clear PDF</button>}
+              {source.imageBase64 && <button type="button" className="secondary" onClick={() => setSource(index, { imageBase64: null, imageName: null, imageMediaType: null })} disabled={status === "processing"}>Remove image</button>}
+              {source.pdfName && <button type="button" className="secondary" onClick={() => setSource(index, { text: "", pdfName: null })} disabled={status === "processing"}>Clear PDF</button>}
             </div>
           </div>
         ))}
         {sources.length < MAX_SOURCES && (
           <div className="flow-subsection">
-            <button type="button" className="secondary" onClick={addSource} disabled={status === "analyzing" || status === "generating"}>+ Add resource {sources.length + 1}</button>
+            <button type="button" className="secondary" onClick={addSource} disabled={status === "processing"}>+ Add resource {sources.length + 1}</button>
           </div>
         )}
         {validationErrors.resources && <p className="validation-error">{validationErrors.resources}</p>}
@@ -281,23 +254,23 @@ export default function Home() {
           placeholder="Paste Jack Westin chapter or section text here, or upload a PDF to extract text…"
           value={jackWestin.text}
           onChange={(e) => setJW({ text: e.target.value })}
-          disabled={status === "analyzing" || status === "generating"}
+          disabled={status === "processing"}
           className="flow-textarea flow-textarea-jw"
         />
         <div className="file-row">
           <input ref={jwFileRef} type="file" accept="image/*,application/pdf" aria-label="Upload image or PDF for Jack Westin" onChange={onJWFile} style={{ display: "none" }} />
-          <button type="button" className="secondary" onClick={() => jwFileRef.current?.click()} disabled={status === "analyzing" || status === "generating" || pdfExtracting}>
+          <button type="button" className="secondary" onClick={() => jwFileRef.current?.click()} disabled={status === "processing" || pdfExtracting}>
             {jackWestin.pdfName ? `PDF: ${jackWestin.pdfName}` : jackWestin.imageName ? `Image: ${jackWestin.imageName}` : "Upload Jack Westin PDF or image"}
           </button>
-          {jackWestin.imageBase64 && <button type="button" className="secondary" onClick={() => setJW({ imageBase64: null, imageName: null, imageMediaType: null })} disabled={status === "analyzing" || status === "generating"}>Remove image</button>}
-          {jackWestin.pdfName && <button type="button" className="secondary" onClick={() => setJW({ text: "", pdfName: null })} disabled={status === "analyzing" || status === "generating"}>Clear PDF</button>}
+          {jackWestin.imageBase64 && <button type="button" className="secondary" onClick={() => setJW({ imageBase64: null, imageName: null, imageMediaType: null })} disabled={status === "processing"}>Remove image</button>}
+          {jackWestin.pdfName && <button type="button" className="secondary" onClick={() => setJW({ text: "", pdfName: null })} disabled={status === "processing"}>Clear PDF</button>}
         </div>
         {validationErrors.jackWestin && <p className="validation-error">{validationErrors.jackWestin}</p>}
       </div>
 
       <div className="flow-card flow-cta-card">
         <button type="button" className="cta-button" onClick={canRun ? runFlow : undefined} disabled={!canRun}>
-          {status === "analyzing" ? "Identifying gaps…" : status === "generating" ? "Generating final text…" : "Analyze & generate"}
+          {status === "processing" ? "Filling gaps…" : "Fill gaps"}
         </button>
         {(status === "done" || status === "error") && (
           <button type="button" className="secondary flow-reset-btn" onClick={resetOutputs}>
@@ -313,30 +286,21 @@ export default function Home() {
         </div>
       )}
 
-      {status === "analyzing" && (
+      {status === "processing" && (
         <div className="flow-card flow-output-card">
-          <LoadingState label="Identifying gaps in Jack Westin coverage…" />
+          <LoadingState label="Identifying gaps and building the complete document…" />
         </div>
       )}
 
-      {missingTopics !== null && (
+      {gapSummary !== null && gapSummary.length > 0 && (
         <div className="flow-card flow-output-card">
-          <MissingTopicsBlock
-            missingTopics={missingTopics}
-            noGapsMessage={missingTopics.length === 0 ? "No significant gaps detected — the Jack Westin content appears to cover all topics in the provided resources." : null}
-          />
+          <GapSummaryBlock content={gapSummary} />
         </div>
       )}
 
-      {status === "generating" && (
+      {fullDocument !== null && (
         <div className="flow-card flow-output-card">
-          <LoadingState label="Generating enhanced output (pedagogy + missing topics)…" />
-        </div>
-      )}
-
-      {finalText !== null && (
-        <div className="flow-card flow-output-card">
-          <FinalTextBlock content={finalText} />
+          <FinalTextBlock content={fullDocument} title="Complete Edited Document" />
         </div>
       )}
     </main>
