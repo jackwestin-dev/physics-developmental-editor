@@ -5,9 +5,10 @@ import ReactMarkdown from "react-markdown";
 
 type GapSummaryBlockProps = {
   content: string;
+  title?: string;
 };
 
-export function GapSummaryBlock({ content }: GapSummaryBlockProps) {
+export function GapSummaryBlock({ content, title = "Gap Summary" }: GapSummaryBlockProps) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -19,7 +20,7 @@ export function GapSummaryBlock({ content }: GapSummaryBlockProps) {
   return (
     <div className="animate-fade-in rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 pb-3">
-        <h2 className="text-lg font-semibold text-slate-dark">Gap Summary</h2>
+        <h2 className="text-lg font-semibold text-slate-dark">{title}</h2>
         <button
           type="button"
           onClick={handleCopy}

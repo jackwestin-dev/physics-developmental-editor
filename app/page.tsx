@@ -57,6 +57,8 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [gapSummary, setGapSummary] = useState<string | null>(null);
   const [fullDocument, setFullDocument] = useState<string | null>(null);
+  const [auditReport, setAuditReport] = useState<string | null>(null);
+  const [loadingPhase, setLoadingPhase] = useState<"gap_fill" | "plagiarism_check">("gap_fill");
   const [validationErrors, setValidationErrors] = useState<{ resources?: string; jackWestin?: string }>({});
   const [pdfExtracting, setPdfExtracting] = useState(false);
 
@@ -158,7 +160,9 @@ export default function Home() {
     setError(null);
     setGapSummary(null);
     setFullDocument(null);
+    setAuditReport(null);
     setStatus("processing");
+    setLoadingPhase("gap_fill");
 
     try {
       const res = await fetch("/api/gap-fill", {
@@ -175,7 +179,25 @@ export default function Home() {
       }
 
       setGapSummary(typeof data.gapSummary === "string" ? data.gapSummary : "");
-      setFullDocument(typeof data.fullDocument === "string" ? data.fullDocument : "");
+      const gapFilledDoc = typeof data.fullDocument === "string" ? data.fullDocument : "";
+      setFullDocument(gapFilledDoc);
+
+      setLoadingPhase("plagiarism_check");
+      const plagRes = await fetch("/api/plagiarism-check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sourceText: resourceText, outputText: gapFilledDoc }),
+      });
+      const plagData = await plagRes.json();
+
+      if (!plagRes.ok) {
+        setStatus("error");
+        setError(plagData.error ?? "Plagiarism check failed.");
+        return;
+      }
+
+      setFullDocument(typeof plagData.revisedDocument === "string" ? plagData.revisedDocument : gapFilledDoc);
+      setAuditReport(typeof plagData.auditReport === "string" ? plagData.auditReport : "");
       setStatus("done");
     } catch (err) {
       setStatus("error");
@@ -186,6 +208,7 @@ export default function Home() {
   function resetOutputs() {
     setGapSummary(null);
     setFullDocument(null);
+    setAuditReport(null);
     setStatus("idle");
     setError(null);
   }
@@ -196,7 +219,7 @@ export default function Home() {
         <p className="course-title">Physics Textbook Developmental Editor</p>
         <h1>Unified flow</h1>
         <p className="subtitle">
-          Add <strong>external resources</strong> (1–5: text, images, or PDFs), then the <strong>Jack Westin book</strong>. Run once to get a gap summary and a single, gap-filled document.
+          Add <strong>external resources</strong> (1–5: text, images, or PDFs), then the <strong>Jack Westin book</strong>. Run once to get a gap summary, a plagiarism-checked document, and an audit report.
         </p>
       </header>
 
@@ -270,7 +293,11 @@ export default function Home() {
 
       <div className="flow-card flow-cta-card">
         <button type="button" className="cta-button" onClick={canRun ? runFlow : undefined} disabled={!canRun}>
-          {status === "processing" ? "Filling gaps…" : "Fill gaps"}
+          {status === "processing"
+            ? loadingPhase === "plagiarism_check"
+              ? "Checking plagiarism…"
+              : "Filling gaps…"
+            : "Fill gaps & check plagiarism"}
         </button>
         {(status === "done" || status === "error") && (
           <button type="button" className="secondary flow-reset-btn" onClick={resetOutputs}>
@@ -288,7 +315,13 @@ export default function Home() {
 
       {status === "processing" && (
         <div className="flow-card flow-output-card">
-          <LoadingState label="Identifying gaps and building the complete document…" />
+          <LoadingState
+            label={
+              loadingPhase === "plagiarism_check"
+                ? "Checking for plagiarism and revising flagged passages…"
+                : "Identifying gaps and building the complete document…"
+            }
+          />
         </div>
       )}
 
@@ -300,7 +333,13 @@ export default function Home() {
 
       {fullDocument !== null && (
         <div className="flow-card flow-output-card">
-          <FinalTextBlock content={fullDocument} title="Complete Edited Document" />
+          <FinalTextBlock content={fullDocument} title="Complete Edited Document (plagiarism-checked)" />
+        </div>
+      )}
+
+      {auditReport !== null && auditReport.length > 0 && (
+        <div className="flow-card flow-output-card">
+          <GapSummaryBlock content={auditReport} title="Plagiarism Audit Report" />
         </div>
       )}
     </main>
